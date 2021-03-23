@@ -103,9 +103,31 @@ def count_starts_and_stops(database):
     print(f'Finish stops: {len(finish_stops)}', finish_stops)
 
 
+def valid_time(database):
+    temp = {}
+    result = {}
+    for i in database:
+        temp_id = i.get('bus_id')
+        if temp_id in result:
+            continue
+        time = i.get('a_time')
+        if temp_id not in temp:
+            temp.update({temp_id: [time]})
+        else:
+            temp[temp_id].append(time)
+            if temp[temp_id] != sorted(temp[temp_id]):
+                result.update({temp_id: [i.get('stop_name')]})
+    print('Arrival time test: ')
+    if result:
+        for i in result:
+            print(f'bus_id line {i}: wrong time on station {"".join(result.get(i))}')
+    else:
+        print('OK')
+
+
 tmp = input()
 json_format = json.loads(tmp)
-count_starts_and_stops(json_format)
+valid_time(json_format)
 
 
 
