@@ -4,6 +4,7 @@ import itertools
 
 
 def check_type(database):
+    """check is correct type in database field's"""
     data_types = {
         "bus_id": "(128|256|512)",
         "stop_id": "\d{1}",
@@ -59,6 +60,7 @@ def print_result(result):
 
 
 def count_starts_and_stops(database):
+    """Count of start stops, transfer stops(shared by at least two bus lines), finish stops.  If line dont have start stop or finish stop prints which line is."""
     start_stops = []
     transfer_stops = []
     finish_stops = []
@@ -98,12 +100,14 @@ def count_starts_and_stops(database):
     for i in tem:
         if tem.count(i) >= 2 and i not in res:
             res.append(i)
-    print(f'Start stops: {len(start_stops)}', start_stops)
-    print(f'Transfer stops: {len(res)}', res)
-    print(f'Finish stops: {len(finish_stops)}', finish_stops)
+    # print(f'Start stops: {len(start_stops)}', start_stops)
+    # print(f'Transfer stops: {len(res)}', res)
+    # print(f'Finish stops: {len(finish_stops)}', finish_stops)
+    return start_stops, res, finish_stops
 
 
 def valid_time(database):
+    """Check is valid arrival time(lesser than next stop) in each bus line"""
     temp = {}
     result = {}
     for i in database:
@@ -125,9 +129,20 @@ def valid_time(database):
         print('OK')
 
 
-tmp = input()
-json_format = json.loads(tmp)
-valid_time(json_format)
-
+def on_demand(database):
+    """check start,transfer,finish stops are not 'On demand'. If True print sorted list of them"""
+    start_stops, transfer_stops, finish_stops = count_starts_and_stops(database)
+    check = set(start_stops + transfer_stops + finish_stops)
+    result = []
+    for i in database:
+        if i.get('stop_type') == 'O' and i.get('stop_name') in check:
+            result.append(i.get('stop_name'))
+        else:
+            continue
+    print('On demand stops test:')
+    if result:
+        print(f'Wrong stop type:', sorted(result))
+    else:
+        print('OK')
 
 
