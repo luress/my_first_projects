@@ -1,88 +1,6 @@
 import re
 import json
 import itertools
-abc = [
-    {
-        "bus_id": 128,
-        "stop_id": 1,
-        "stop_name": "Prospekt Avenue",
-        "next_stop": 3,
-        "stop_type": "S",
-        "a_time": "08:12"
-    },
-    {
-        "bus_id": 128,
-        "stop_id": 3,
-        "stop_name": "Elm Street",
-        "next_stop": 5,
-        "stop_type": "",
-        "a_time": "08:19"
-    },
-    {
-        "bus_id": 128,
-        "stop_id": 5,
-        "stop_name": "Fifth Avenue",
-        "next_stop": 7,
-        "stop_type": "O",
-        "a_time": "08:25"
-    },
-    {
-        "bus_id": 128,
-        "stop_id": 7,
-        "stop_name": "Sesame Street",
-        "next_stop": 0,
-        "stop_type": "F",
-        "a_time": "08:37"
-    },
-    {
-        "bus_id": 256,
-        "stop_id": 2,
-        "stop_name": "Pilotow Street",
-        "next_stop": 3,
-        "stop_type": "S",
-        "a_time": "09:20"
-    },
-    {
-        "bus_id": 256,
-        "stop_id": 3,
-        "stop_name": "Elm Street",
-        "next_stop": 6,
-        "stop_type": "",
-        "a_time": "09:45"
-    },
-    {
-        "bus_id": 256,
-        "stop_id": 6,
-        "stop_name": "Sunset Boulevard",
-        "next_stop": 7,
-        "stop_type": "",
-        "a_time": "09:59"
-    },
-    {
-        "bus_id": 256,
-        "stop_id": 7,
-        "stop_name": "Sesame Street",
-        "next_stop": 0,
-        "stop_type": "F",
-        "a_time": "10:12"
-    },
-    {
-        "bus_id": 512,
-        "stop_id": 4,
-        "stop_name": "Bourbon Street",
-        "next_stop": 6,
-        "stop_type": "S",
-        "a_time": "08:13"
-    },
-    {
-        "bus_id": 512,
-        "stop_id": 6,
-        "stop_name": "Sunset Boulevard",
-        "next_stop": 0,
-        "stop_type": "F",
-        "a_time": "08:16"
-    }
-]
 
 
 def check_type(database):
@@ -140,18 +58,54 @@ def print_result(result):
         print(f'{key}: {result.get(key)}')
 
 
+def count_starts_and_stops(database):
+    start_stops = []
+    transfer_stops = []
+    finish_stops = []
+    temp = {}
+    for i in database:
+        temp_id = i.get('bus_id')
+        if temp_id not in temp:
+            if i.get('stop_type') == 'S':
+                temp.update({temp_id: [i.get('stop_type')]})
+            else:
+                print(f'There is no start or end stop for the line: {temp_id}.')
+                break
+        else:
+            temp[temp_id].append(i.get('stop_type'))
 
-main_courses = ['beef stew', 'fried fish']
-price_main_courses = [28, 23]
+        if i.get('bus_id') == temp_id and i.get('stop_type') == 'S':
+            if i.get('stop_name') in start_stops:
+                transfer_stops.append(i.get('stop_name'))
+                continue
+            start_stops.append(i.get('stop_name'))
+        elif i.get('bus_id') == temp_id and i.get('stop_type') == 'F':
+            if i.get('stop_name') in finish_stops:
+                transfer_stops.append(i.get('stop_name'))
+                continue
+            finish_stops.append(i.get('stop_name'))
+        else:
+            transfer_stops.append(i.get('stop_name'))
+    for i in temp:
+        if temp.get(i).count('S') == 1 and temp.get(i).count('F') == 1:
+            continue
+        else:
+            print(f'There is no start or end stop for the line: {i}.')
+            break
+    tem = [i for i in itertools.chain(start_stops, transfer_stops, finish_stops)]
+    print(tem)
+    res = []
+    for i in tem:
+        if tem.count(i) >= 2 and i not in res:
+            res.append(i)
+    print(f'Start stops: {len(start_stops)}', start_stops)
+    print(f'Transfer stops: {len(res)}', res)
+    print(f'Finish stops: {len(finish_stops)}', finish_stops)
 
-desserts = ['ice-cream', 'cake']
-price_desserts = [2, 4]
 
-drinks = ['cola', 'wine']
-price_drinks = [3, 10]
-dict = {}
+tmp = input()
+json_format = json.loads(tmp)
+count_starts_and_stops(json_format)
 
 
-for i, j in zip(itertools.combinations(itertools.chain(main_courses, desserts, drinks), 3), itertools.combinations(itertools.chain(price_main_courses, price_desserts, price_drinks), 3)):
-    if i[0] in main_courses and i[1] in desserts and i[2] in drinks and sum(j) <= 30:
-        print(i, sum(j))
+
